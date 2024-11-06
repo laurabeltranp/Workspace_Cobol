@@ -1,0 +1,88 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. BUSCAR-UN-PRODUCTO.
+
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SPECIAL-NAMES.
+           DECIMAL-POINT IS COMMA.
+
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT PRODUCTO
+               ASSIGN TO "PRODUCTO-INDEXADO.dat"
+               ORGANIZATION IS INDEXED
+               RECORD KEY PRODUCTO-ID
+               ACCESS MODE IS DYNAMIC
+               FILE STATUS IS FILE-STATUS.
+
+       DATA DIVISION.
+           FILE SECTION.
+           FD PRODUCTO.
+           01 PRODUCTO-REGISTRO.
+               03 PRODUCTO-ID PIC 9(6).
+               03 PRODUCTO-CONTROL PIC 9.
+               03 PRODUCTO-DESCRIP PIC X(35).
+               03 PRODUCTO-PRECIO PIC 9(4)V99.
+               03 PRODUCTO-STOCK PIC 9(6).
+               03 PRODUCTO-CADUCIDAD.
+                   05 PRODUCTO-CAD-AAAA PIC 9(4).
+                   05 PRODUCTO-CAD-MM PIC 99.
+                   05 PRODUCTO-CAD-DD PIC 99.
+               03 PRODUCTO-CRITICO PIC 9(6).
+               03 PRODUCTO-ALTA-FECH.
+                   05 PRODUCTO-ALTA-AAAA PIC 9(4).
+                   05 PRODUCTO-ALTA-MM PIC 99.
+                   05 PRODUCTO-ALTA-DD PIC 99.
+
+       WORKING-STORAGE SECTION.
+       01 PRODUCTO-ID-BUSCADO PIC 9(6).
+       01 CONTINUE-PROG PIC X VALUE "S".
+       01 File-Status PIC XX VALUE SPACES.
+       PROCEDURE DIVISION.
+       OPEN I-O PRODUCTO.
+       IF FILE-STATUS = "35"
+        DISPLAY "El archivo no existe. Se procede a crearlo."
+        OPEN OUTPUT PRODUCTO
+        CLOSE PRODUCTO
+      * Reintentar abrir en modo I-O
+        OPEN I-O PRODUCTO
+       END-IF
+
+      * Verificar si el archivo se abrió correctamente
+       IF FILE-STATUS NOT = "00"
+        DISPLAY "Error al abrir el archivo. Codigo de estado: "
+        FILE-STATUS
+        CLOSE PRODUCTO
+        STOP RUN
+       END-IF
+
+       PERFORM UNTIL CONTINUE-PROG = "N"
+
+       DISPLAY "Ingrese el ID del producto: "
+        ACCEPT PRODUCTO-ID
+
+        READ PRODUCTO
+        INVALID KEY
+        DISPLAY "PRODUCTO NO ENCONTRADO. CERRANDO PROGRAMA"
+        MOVE "N" TO CONTINUE-PROG
+        NOT INVALID KEY
+        DISPLAY "PRODUCTO ENCONTRADO: "
+        DISPLAY "ID: " PRODUCTO-ID
+        DISPLAY "1. DESCRIPCION: " PRODUCTO-DESCRIP
+        DISPLAY "2. PRECIO: " PRODUCTO-PRECIO
+        DISPLAY "3. STOCK: " PRODUCTO-STOCK
+        DISPLAY "4. CADUCIDAD ANIO: " PRODUCTO-CAD-AAAA
+        DISPLAY "5. CADUCIDAD MES: " PRODUCTO-CAD-MM
+        DISPLAY "6. CADUCIDAD DIA: " PRODUCTO-CAD-DD
+        DISPLAY "2. CRITICO: " PRODUCTO-CRITICO
+        DISPLAY "4. ALTA ANIO: " PRODUCTO-ALTA-AAAA
+        DISPLAY "5. ALTA MES: " PRODUCTO-ALTA-MM
+        DISPLAY "6. ALTA DIA: " PRODUCTO-ALTA-DD
+
+       DISPLAY "¿DESEA REALIZAR OTRA MODIFICACION? S/N"
+       ACCEPT CONTINUE-PROG
+       END-READ
+       END-PERFORM.
+
+       STOP RUN.
+       END PROGRAM BUSCAR-UN-PRODUCTO.
